@@ -18,15 +18,13 @@ class FSlateWindowElementList;
 
 class DEMORPG_API SDesiredSizeBox : public SPanel
 {
+	SLATE_DECLARE_WIDGET(SDesiredSizeBox, SPanel)
+
 public:
-	class FDesiredSizeBoxSlot : public TSupportsOneChildMixin<FDesiredSizeBoxSlot>, public TSupportsContentAlignmentMixin<FDesiredSizeBoxSlot>, public TSupportsContentPaddingMixin<FDesiredSizeBoxSlot>
+	class UE_DEPRECATED(5.0, "FDesiredSizeBoxSlot is deprecated. Use FSingleWidgetChildrenWithBasicLayoutSlot or FOneSimpleMemberChild")
+	FDesiredSizeBoxSlot : public FSingleWidgetChildrenWithBasicLayoutSlot
 	{
-	public:
-		FDesiredSizeBoxSlot(SWidget* InOwner)
-			: TSupportsOneChildMixin<FDesiredSizeBoxSlot>(InOwner)
-			, TSupportsContentAlignmentMixin<FDesiredSizeBoxSlot>(HAlign_Fill, VAlign_Fill)
-		{
-		}
+		using FSingleWidgetChildrenWithBasicLayoutSlot::FSingleWidgetChildrenWithBasicLayoutSlot;
 	};
 
 	SLATE_BEGIN_ARGS(SDesiredSizeBox)
@@ -40,16 +38,16 @@ public:
 		_Visibility = EVisibility::SelfHitTestInvisible;
 	}
 
-	/** Horizontal alignment of content in the area allotted to the SBox by its parent */
+	/** Horizontal alignment of content in the area allotted to the SDesiredSizeBox by its parent */
 	SLATE_ARGUMENT(EHorizontalAlignment, HAlign)
 
-	/** Vertical alignment of content in the area allotted to the SBox by its parent */
+	/** Vertical alignment of content in the area allotted to the SDesiredSizeBox by its parent */
 	SLATE_ARGUMENT(EVerticalAlignment, VAlign)
 
-	/** Padding between the SBox and the content that it presents. Padding affects desired size. */
+	/** Padding between the SDesiredSizeBox and the content that it presents. Padding affects desired size. */
 	SLATE_ATTRIBUTE(FMargin, Padding)
 
-	/** The widget content presented by the SBox */
+	/** The widget content presented by the SDesiredSizeBox */
 	SLATE_DEFAULT_SLOT(FArguments, Content)
 
 	/** Report content's desired width multiplied by WidthFactor. */
@@ -74,13 +72,13 @@ public:
 	void SetContent(const TSharedRef<SWidget>& InContent);
 
 	/** See HAlign argument */
-	void SetHAlign(const EHorizontalAlignment HAlign);
+	void SetHAlign(EHorizontalAlignment HAlign);
 
 	/** See VAlign argument */
-	void SetVAlign(const EVerticalAlignment VAlign);
+	void SetVAlign(EVerticalAlignment VAlign);
 
 	/** See Padding attribute */
-	void SetPadding(const TAttribute<FMargin>& InPadding);
+	void SetPadding(TAttribute<FMargin> InPadding);
 
 	/** See WidthOverride attribute */
 	void SetWidthFactor(TAttribute<FOptionalSize> InWidthFactor);
@@ -95,12 +93,17 @@ protected:
 	float ComputeDesiredHeight() const;
 	// End SWidget overrides.
 
-	FDesiredSizeBoxSlot ChildSlot;
+	struct FDesiredSizeBoxOneChildSlot : TSingleWidgetChildrenWithBasicLayoutSlot<EInvalidateWidgetReason::None> // we want to add it to the Attribute descriptor
+	{
+		friend SDesiredSizeBox;
+		using TSingleWidgetChildrenWithBasicLayoutSlot<EInvalidateWidgetReason::None>::TSingleWidgetChildrenWithBasicLayoutSlot;
+	};
+	FDesiredSizeBoxOneChildSlot ChildSlot;
 
 private:
 	/** Report content's desired width multiplied by WidthFactor. */
-	TAttribute<FOptionalSize> WidthFactor;
+	TSlateAttribute<FOptionalSize> WidthFactor;
 
 	/** Report content's desired height multiplied by HeightFactor. */
-	TAttribute<FOptionalSize> HeightFactor;
+	TSlateAttribute<FOptionalSize> HeightFactor;
 };

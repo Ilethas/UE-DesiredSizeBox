@@ -5,8 +5,18 @@
 
 #include "Layout/LayoutUtils.h"
 
+SLATE_IMPLEMENT_WIDGET(SDesiredSizeBox)
+void SDesiredSizeBox::PrivateRegisterAttributes(FSlateAttributeInitializer& AttributeInitializer)
+{
+	SLATE_ADD_MEMBER_ATTRIBUTE_DEFINITION_WITH_NAME(AttributeInitializer, "SlotPadding", ChildSlot.SlotPaddingAttribute, EInvalidateWidgetReason::Layout);
+	SLATE_ADD_MEMBER_ATTRIBUTE_DEFINITION(AttributeInitializer, WidthFactor, EInvalidateWidgetReason::Layout);
+	SLATE_ADD_MEMBER_ATTRIBUTE_DEFINITION(AttributeInitializer, HeightFactor, EInvalidateWidgetReason::Layout);
+}
+
 SDesiredSizeBox::SDesiredSizeBox()
 	: ChildSlot(this)
+	, WidthFactor(*this)
+	, HeightFactor(*this)
 {
 	SetCanTick(false);
 	bCanSupportFocus = false;
@@ -14,8 +24,8 @@ SDesiredSizeBox::SDesiredSizeBox()
 
 void SDesiredSizeBox::Construct(const FArguments& InArgs)
 {
-	WidthFactor  = InArgs._WidthFactor;
-	HeightFactor = InArgs._HeightFactor;
+	SetWidthFactor(InArgs._WidthFactor);
+	SetHeightFactor(InArgs._HeightFactor);
 
 	ChildSlot
 		.HAlign(InArgs._HAlign)
@@ -29,52 +39,34 @@ void SDesiredSizeBox::Construct(const FArguments& InArgs)
 void SDesiredSizeBox::SetContent(const TSharedRef<SWidget>& InContent)
 {
 	ChildSlot
-		[
-			InContent
-		];
-
-	// TODO SlateGI - This seems no longer needed.
-	Invalidate(EInvalidateWidget::Layout);
+	[
+		InContent
+	];
 }
 
 void SDesiredSizeBox::SetHAlign(const EHorizontalAlignment HAlign)
 {
-	// TODO SlateGI - Fix Slots
-	if (ChildSlot.HAlignment != HAlign)
-	{
-		ChildSlot.HAlignment = HAlign;
-		Invalidate(EInvalidateWidget::Layout);
-	}
+	ChildSlot.SetHorizontalAlignment(HAlign);
 }
 
 void SDesiredSizeBox::SetVAlign(const EVerticalAlignment VAlign)
 {
-	// TODO SlateGI - Fix Slots
-	if (ChildSlot.VAlignment != VAlign)
-	{
-		ChildSlot.VAlignment = VAlign;
-		Invalidate(EInvalidateWidget::Layout);
-	}
+	ChildSlot.SetVerticalAlignment(VAlign);
 }
 
-void SDesiredSizeBox::SetPadding(const TAttribute<FMargin>& InPadding)
+void SDesiredSizeBox::SetPadding(TAttribute<FMargin> InPadding)
 {
-	// TODO SlateGI - Fix Slots
-	if (!ChildSlot.SlotPadding.IdenticalTo(InPadding))
-	{
-		ChildSlot.SlotPadding = InPadding;
-		Invalidate(EInvalidateWidget::LayoutAndVolatility);
-	}
+	ChildSlot.SetPadding(InPadding);
 }
 
-void SDesiredSizeBox::SetWidthFactor(const TAttribute<FOptionalSize> InWidthFactor)
+void SDesiredSizeBox::SetWidthFactor(TAttribute<FOptionalSize> InWidthFactor)
 {
-	SetAttribute(WidthFactor, InWidthFactor, EInvalidateWidgetReason::Layout);
+	WidthFactor.Assign(*this, InWidthFactor);
 }
 
-void SDesiredSizeBox::SetHeightFactor(const TAttribute<FOptionalSize> InHeightFactor)
+void SDesiredSizeBox::SetHeightFactor(TAttribute<FOptionalSize> InHeightFactor)
 {
-	SetAttribute(HeightFactor, InHeightFactor, EInvalidateWidgetReason::Layout);
+	HeightFactor.Assign(*this, InHeightFactor);
 }
 
 FVector2D SDesiredSizeBox::ComputeDesiredSize(float) const
@@ -89,7 +81,7 @@ FVector2D SDesiredSizeBox::ComputeDesiredSize(float) const
 
 float SDesiredSizeBox::ComputeDesiredWidth() const
 {
-	const FVector2D& UnmodifiedChildDesiredSize = ChildSlot.GetWidget()->GetDesiredSize() + ChildSlot.SlotPadding.Get().GetDesiredSize();
+	const FVector2D& UnmodifiedChildDesiredSize = ChildSlot.GetWidget()->GetDesiredSize() + ChildSlot.GetPadding().GetDesiredSize();
 	const FOptionalSize CurrentWidthFactor = WidthFactor.Get();
 
 	float CurrentWidth = UnmodifiedChildDesiredSize.X;
@@ -102,7 +94,7 @@ float SDesiredSizeBox::ComputeDesiredWidth() const
 
 float SDesiredSizeBox::ComputeDesiredHeight() const
 {
-	const FVector2D& UnmodifiedChildDesiredSize = ChildSlot.GetWidget()->GetDesiredSize() + ChildSlot.SlotPadding.Get().GetDesiredSize();
+	const FVector2D& UnmodifiedChildDesiredSize = ChildSlot.GetWidget()->GetDesiredSize() + ChildSlot.GetPadding().GetDesiredSize();
 	const FOptionalSize CurrentHeightFactor = HeightFactor.Get();
 
 	float CurrentHeight = UnmodifiedChildDesiredSize.Y;
@@ -118,7 +110,7 @@ void SDesiredSizeBox::OnArrangeChildren(const FGeometry& AllottedGeometry, FArra
 	const EVisibility ChildVisibility = ChildSlot.GetWidget()->GetVisibility();
 	if (ArrangedChildren.Accepts(ChildVisibility))
 	{
-		const FMargin SlotPadding(ChildSlot.SlotPadding.Get());
+		const FMargin SlotPadding(ChildSlot.GetPadding());
 		const AlignmentArrangeResult XAlignmentResult = AlignChild<Orient_Horizontal>(AllottedGeometry.GetLocalSize().X, ChildSlot, SlotPadding);
 		const AlignmentArrangeResult YAlignmentResult = AlignChild<Orient_Vertical>(AllottedGeometry.GetLocalSize().Y, ChildSlot, SlotPadding);
 		

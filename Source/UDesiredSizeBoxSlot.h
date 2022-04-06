@@ -5,6 +5,7 @@
 #include "Components/PanelSlot.h"
 #include "UDesiredSizeBoxSlot.generated.h"
 
+class SDesiredSizeBox;
 UCLASS()
 class DEMORPG_API UDesiredSizeBoxSlot : public UPanelSlot
 {
@@ -37,11 +38,11 @@ public:
 	// End of UPanelSlot interface
 
 	/** Builds the underlying slot for the slate SizeBox. */
-	void BuildSlot(const TSharedRef<class SDesiredSizeBox> InDesiredSizeBox);
+	void BuildSlot(const TSharedRef<SDesiredSizeBox> InDesiredSizeBox);
 
 	virtual void ReleaseSlateResources(const bool bReleaseChildren) override;
 	
 private:
 	/** A pointer to the button to allow us to adjust the size, padding...etc at runtime. */
-	TWeakPtr<class SDesiredSizeBox> DesiredSizeBox;
+	TWeakPtr<SDesiredSizeBox> DesiredSizeBox;
 };

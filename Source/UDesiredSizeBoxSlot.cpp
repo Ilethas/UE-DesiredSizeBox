@@ -49,4 +49,6 @@ void UDesiredSizeBoxSlot::BuildSlot(const TSharedRef<SDesiredSizeBox> InDesiredS
 void UDesiredSizeBoxSlot::ReleaseSlateResources(const bool bReleaseChildren)
 {
 	Super::ReleaseSlateResources(bReleaseChildren);
+
+	DesiredSizeBox.Reset();
 }

@@ -7,6 +7,7 @@
 #include "Widgets/SWidget.h"
 #include "UDesiredSizeBox.generated.h"
 
+class SDesiredSizeBox;
 UCLASS()
 class DEMORPG_API UDesiredSizeBox : public UContentWidget
 {
@@ -51,7 +52,7 @@ public:
 #endif
 
 protected:
-	TSharedPtr<class SDesiredSizeBox> DesiredSizeBox;
+	TSharedPtr<SDesiredSizeBox> DesiredSizeBox;
 	
 	// UPanelWidget
 	virtual UClass* GetSlotClass() const override;
